@@ -290,6 +290,23 @@ void drawScreen() {
   tft.drawRect(BAR_X - 1, BAR_TOP - 1, BAR_W + 2, BAR_H + 2, outline);
   tft.drawRect(BAR_X - 2, BAR_TOP - 2, BAR_W + 4, BAR_H + 4, outline);   // 2px thick so it's easy to see
 
+  // Frozen: screen dims, and your partner's presses show up as sparks
+  static int lastPartnerCount = 0;
+  int partner = 1 - PLAYER_ID;
+  bool frozen = gameStarted && !gameOver && frozenPlayer == PLAYER_ID;
+  int newPresses = counts[partner] - lastPartnerCount;
+  lastPartnerCount = counts[partner];
+
+  if (frozen && newPresses > 0) {
+    for (int s = 0; s < min(newPresses, 4) * 6; s++) {
+      tft.fillRect(BAR_X + random(BAR_W - 3), BAR_TOP + random(BAR_H - 3), 3, 3,
+                   random(2) ? TFT_WHITE : playerColors[partner]);
+    }
+    analogWrite(TFT_BL, 255);               // flash bright with the sparks
+  } else {
+    analogWrite(TFT_BL, frozen ? 40 : 255); // dim while frozen, full otherwise
+  }
+
   // Player label and count (opaque text with padding, so old text is wiped)
   tft.setTextPadding(110);
   for (int i = 0; i < MAX_PLAYERS; i++) {
@@ -462,6 +479,7 @@ void loop() {
       if (PLAYER_ID == 0) {
         counts[PLAYER_ID]++;
         checkForWinner();
+        sendState();   // send every press so Player 1 sees sparks right away
       } else {
         turnPresses++;
         sendState();
