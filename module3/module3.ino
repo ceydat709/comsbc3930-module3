@@ -284,7 +284,11 @@ void drawScreen() {
   tft.fillRect(BAR_X, BAR_TOP, fill0, BAR_H, playerColors[0]);
   tft.fillRect(BAR_X + fill0, BAR_TOP, fill1, BAR_H, playerColors[1]);
   tft.fillRect(BAR_X + fill0 + fill1, BAR_TOP, BAR_W - fill0 - fill1, BAR_H, TFT_BLACK);
-  tft.drawRect(BAR_X - 1, BAR_TOP - 1, BAR_W + 2, BAR_H + 2, TFT_WHITE);
+  // Outline glows in the color of whoever's turn it is (white when not playing)
+  uint16_t outline = TFT_WHITE;
+  if (gameStarted && !gameOver) outline = playerColors[1 - frozenPlayer];
+  tft.drawRect(BAR_X - 1, BAR_TOP - 1, BAR_W + 2, BAR_H + 2, outline);
+  tft.drawRect(BAR_X - 2, BAR_TOP - 2, BAR_W + 4, BAR_H + 4, outline);   // 2px thick so it's easy to see
 
   // Player label and count (opaque text with padding, so old text is wiped)
   tft.setTextPadding(110);
