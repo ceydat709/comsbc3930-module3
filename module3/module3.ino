@@ -61,6 +61,7 @@ bool peerConnected = false;
 uint32_t peerConnectedAt = 0;
 uint32_t stateSequence = 0;
 uint32_t lastReceivedSequence = 0;
+uint32_t finalTimeLeft = 0;   // time left when the game ended
 
 // message structure between devices
 typedef struct {
@@ -161,7 +162,13 @@ void sendState(bool reset = false) {
 
   // Player 0 controls the official timers
   if (PLAYER_ID == 0) {
-    msg.timeLeft = gameStarted ? remainingTime(roundStartedAt + timeLimitMs) : timeLimitMs;
+    if (gameOver) {
+      msg.timeLeft = finalTimeLeft;
+    } else if (gameStarted) {
+      msg.timeLeft = remainingTime(roundStartedAt + timeLimitMs);
+    } else {
+      msg.timeLeft = timeLimitMs;
+    }
 
     msg.freezeLeft = gameStarted && !gameOver ? remainingTime(freezeEndsAt) : 0;
   }
@@ -293,11 +300,15 @@ void drawScreen() {
   uint32_t freezeLeft;
 
   if (PLAYER_ID == 0) {
-    timeLeft = remainingTime(roundStartedAt + timeLimitMs);
+    timeLeft = gameOver ? finalTimeLeft : remainingTime(roundStartedAt + timeLimitMs);
     freezeLeft = remainingTime(freezeEndsAt);
   } else {
-    uint32_t elapsed = millis() - lastStateReceived; 
-    timeLeft = receivedTimeLeft > elapsed ? receivedTimeLeft - elapsed : 0;
+    uint32_t elapsed = millis() - lastStateReceived;
+    if (gameOver) {
+      timeLeft = receivedTimeLeft;   // already frozen by Player 0
+    } else {
+      timeLeft = receivedTimeLeft > elapsed ? receivedTimeLeft - elapsed : 0;
+    }
     freezeLeft = receivedFreezeLeft > elapsed ? receivedFreezeLeft - elapsed : 0;
   }
 
@@ -390,6 +401,7 @@ void checkForWinner() {
 
   if (counts[0] + counts[1] >= target || timeLeft == 0) {
     gameOver = true;
+    finalTimeLeft = timeLeft;
 
     teamWon = counts[0] + counts[1] >= target && timeLeft > 0;
 
