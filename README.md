@@ -25,12 +25,12 @@ VIDEO COMES HERE
 1. Download and install the [Arduino IDE](https://www.arduino.cc/en/software).
 2. Add ESP32 support by following the [Arduino-ESP32 installation guide](https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html).
 3. Install the `TFT_eSPI` library:
-- Open **Tools > Manage Libraries** in the Arduino IDE.
-- Search for `TFT_eSPI`.
-- Install `TFT_eSPI` by Bodmer.
+   - Open **Tools > Manage Libraries** in the Arduino IDE.
+   - Search for `TFT_eSPI`.
+   - Install `TFT_eSPI` by Bodmer.
 4. Configure `TFT_eSPI` for the LilyGo T-Display:
-- Locate `User_Setup_Select.h` in the `TFT_eSPI` library folder.
-- Ensure the appropriate LilyGo T-Display setup (`Setup25_TTGO_T_Display.h`) is enabled.
+   - Locate `User_Setup_Select.h` in the `TFT_eSPI` library folder.
+   - Ensure the appropriate LilyGo T-Display setup (`Setup25_TTGO_T_Display.h`) is enabled.
 5. Connect the LilyGo T-Display ESP32 devices to your computer using USB-C cables.
 6. Select the appropriate ESP32 board and serial port under **Tools**.
 
