@@ -7,8 +7,7 @@ The game introduces unpredictability through a random freeze mechanism. Only one
 Both devices communicate wirelessly through ESP-NOW, synchronizing button presses, freeze states, and game progress.
 
 ## Project Demo
-
-VIDEO COMES HERE
+![Freeze Frame demo](media/demo.gif)
 
 ## Recreation
 
