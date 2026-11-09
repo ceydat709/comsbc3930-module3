@@ -259,6 +259,34 @@ void processMessages(){
   needsRedraw = true;
 }
 
+// Press history: who made each press, in order, so the bar shows each turn
+// as its own block (blue, orange, blue, orange...) instead of two stacked totals
+#define MAX_HISTORY 100
+uint8_t pressOwner[MAX_HISTORY];
+int historyLen = 0;
+int lastCounts[MAX_PLAYERS] = {0, 0};
+uint8_t historyRound = 0;
+
+void updateHistory() {
+  // New round: start the history over
+  if (roundId != historyRound) {
+    historyRound = roundId;
+    historyLen = 0;
+    lastCounts[0] = lastCounts[1] = 0;
+  }
+
+  // Add the frozen player's new presses first (they came from the turn that
+  // just ended), then the active player's
+  int first = (frozenPlayer < MAX_PLAYERS) ? frozenPlayer : 0;
+  for (int k = 0; k < MAX_PLAYERS; k++) {
+    int p = (first + k) % MAX_PLAYERS;
+    while (lastCounts[p] < counts[p]) {
+      if (historyLen < MAX_HISTORY) pressOwner[historyLen++] = p;
+      lastCounts[p]++;
+    }
+  }
+}
+
 // set up variables for drawing the shared progress bar for both players
 const int BAR_X = 4, BAR_W = 232, BAR_H = 40, BAR_TOP = 10;
 
@@ -276,14 +304,20 @@ void drawScreen() {
     lastSeenCount = numSeen;
   }
 
-  // One shared bar: player 0's presses first, then player 1's stacked after it
-  int fill0 = constrain((counts[0] * BAR_W) / target, 0, BAR_W);
-  int fill1 = constrain((counts[1] * BAR_W) / target, 0, BAR_W - fill0);
-
-  // Progress bar: filled part for each player, empty part, outline
-  tft.fillRect(BAR_X, BAR_TOP, fill0, BAR_H, playerColors[0]);
-  tft.fillRect(BAR_X + fill0, BAR_TOP, fill1, BAR_H, playerColors[1]);
-  tft.fillRect(BAR_X + fill0 + fill1, BAR_TOP, BAR_W - fill0 - fill1, BAR_H, TFT_BLACK);
+  // One shared bar built from turn blocks: each run of presses by the same
+  // player is drawn in their color, in the order the turns happened
+  updateHistory();
+  int filled = 0;   // pixels filled so far
+  int i = 0;
+  while (i < historyLen) {
+    int j = i;
+    while (j < historyLen && pressOwner[j] == pressOwner[i]) j++;   // end of this block
+    int end = constrain((j * BAR_W) / target, 0, BAR_W);
+    tft.fillRect(BAR_X + filled, BAR_TOP, end - filled, BAR_H, playerColors[pressOwner[i]]);
+    filled = end;
+    i = j;
+  }
+  tft.fillRect(BAR_X + filled, BAR_TOP, BAR_W - filled, BAR_H, TFT_BLACK);   // empty part
   // Outline glows in the color of whoever's turn it is (white when not playing)
   uint16_t outline = TFT_WHITE;
   if (gameStarted && !gameOver) outline = playerColors[1 - frozenPlayer];
