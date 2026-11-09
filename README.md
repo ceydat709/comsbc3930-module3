@@ -65,4 +65,4 @@ At the beginning of each round, one player is randomly selected to be frozen. Th
 For more about the artistic vision, design decisions, technical implementation, and development process behind **Freeze Frame**, visit our project blogs:
 
 - [Ho Jin's Project Blog](https://app.notion.com/p/Module-3-Distributed-Communication-ESP-Now-3dc28368cff9805f8047dc67484713cc)
-- [Ceyda's Project Blog](ceyda blog url)
+- [Ceyda's Project Blog](https://ceydat709.github.io/coms3930-design-documentation/modules/module-3.html)
